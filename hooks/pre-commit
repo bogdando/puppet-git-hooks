@@ -99,6 +99,26 @@ do
                     echo "ERB syntax error in ${file}" >&2
                     STATUS=2
                 fi
+
+                # Fix trailing whitespaces
+                echo "### Fixing whitespaces, if any, in ${file}" >&2
+                sed -i 's/[[:space:]]*$//' $file
+                git add $file
+            ;;
+
+            rb)
+                # syntax check templates - this doesn't catch a lot of mistakes,
+                # but it should catch gross mistakes
+                erb -x -T - "${TMPFILE}" | ruby -c > /dev/null 2>&1
+                if [[ $? -ne 0 ]]; then
+                    echo "ERB syntax error in ${file}" >&2
+                    STATUS=2
+                fi
+
+                # Fix trailing whitespaces
+                echo "### Fixing whitespaces, if any, in ${file}" >&2
+                sed -i 's/[[:space:]]*$//' $file
+                git add $file
             ;;
 
             *)
