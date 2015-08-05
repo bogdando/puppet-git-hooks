@@ -1,5 +1,4 @@
-#!/bin/bash
-
+#!/bin/sh
 # Assumptions:
 #
 #    Puppet >= 2.7 is installed on this machine
@@ -20,7 +19,6 @@ PUPPETLINT_FLAGS=${PUPPETLINT_FLAGS:-"
 --no-hard_tabs-check
 --no-nested_classes_or_defines-check
 --no-only_variable_string-check
---error-level error
 --with-context
 --with-filename
 "}
@@ -74,9 +72,11 @@ IFS="
 
 # Get a list of files changed in this transaction
 FILES="$(git diff --cached --name-only --diff-filter=ACM "${revision}")"
-for file in "${FILES}" ; do
+for file in $FILES ; do
   # Don't check empty files
-  if [ $(git cat-file -s ":0:${file}") -eq 0 ]; then
+  f=`git cat-file -s :0:$file`
+  [ -z $f ] && continue
+  if [ $f -eq 0 ]; then
     continue
   fi
 
