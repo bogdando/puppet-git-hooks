@@ -123,7 +123,7 @@ for file in $FILES ; do
       *)
         case $(file --mime --brief ${file}) in
           *x-shellscript*)
-            check_bash $file
+            check_bash ${TMPFILE} $file
             ;;
           *x-ruby*)
             ruby -c $x
