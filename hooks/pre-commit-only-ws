@@ -1,0 +1,50 @@
+#!/bin/sh
+# Redirect output to stderr.
+exec 1>&2
+
+fix_trailing_ws_and_stage() {
+  # Fix trailing whitespaces
+  echo "### Fixing whitespaces, if any, in $1" >&2
+  sed -i 's/[[:space:]]*$//' "$1"
+  git add "$1"
+}
+
+# Get correct git revision
+if git rev-parse --quiet --verify HEAD > /dev/null
+then
+  revision=HEAD
+else
+  # Initial commit: diff against an empty tree object
+  revision=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+IFS="
+"
+
+TMPFILE=$(mktemp /tmp/tmp.XXXXXXXXXX)
+STATUS=0
+
+# Register exit trap for removing temporary files
+trap 'rm -rf $TMPFILE' EXIT INT HUP
+
+# Get a list of files changed in this transaction
+FILES="$(git diff --cached --name-only --diff-filter=ACM "${revision}")"
+for file in $FILES ; do
+  # Don't check empty files
+  f=`git cat-file -s :0:$file`
+  [ -z $f ] && continue
+  if [ $f -eq 0 ]; then
+    continue
+  fi
+
+  git cat-file blob ":0:${file}" > $TMPFILE
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "Unable to checkout ${file}"
+    STATUS=2
+  else
+    fix_trailing_ws_and_stage "${file}"
+  fi
+done
+
+exit $STATUS
