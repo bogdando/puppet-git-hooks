@@ -79,7 +79,7 @@ for file in $FILES ; do
     continue
   fi
 
-  extension="${file##*.}"
+  extension="${file#*.}"
   git cat-file blob ":0:${file}" > $TMPFILE
   rc=$?
   if [ $rc -ne 0 ]; then
@@ -117,6 +117,13 @@ for file in $FILES ; do
 
       sh )
          check_bash ${TMPFILE} ${file}
+      ;;
+
+      yaml )
+         python /usr/local/sbin/check-params.py -d $TMPFILE
+      ;;
+
+      j2.yaml )
       ;;
 
       *)
