@@ -28,7 +28,7 @@ STATUS=0
 trap 'rm -rf $TMPFILE' EXIT INT HUP
 
 # Get a list of files changed in this transaction
-FILES="$(git diff --cached --name-only --diff-filter=ACM "${revision}")"
+FILES="$(git diff --cached --name-only --diff-filter=ACM "${revision}" ':(exclude)*.png')"
 for file in $FILES ; do
   # Don't check empty files
   f=`git cat-file -s :0:$file`
